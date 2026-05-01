@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulaire Film</title>
+</head>
+<body>
+<h1>Ajouter / Modifier un Film</h1>
+<form th:action="@{/films/enregistrer}" th:object="${film}" method="post">
+    <input type="hidden" th:field="*{id}"/>
+    <label>Titre : <input type="text" th:field="*{titre}"/></label><br/>
+    <label>Genre : <input type="text" th:field="*{genre}"/></label><br/>
+    <label>Durée (min) : <input type="number" th:field="*{dureeMin}"/></label><br/>
+    <button type="submit">Enregistrer</button>
+    <a href="/films">Annuler</a>
+</form>
+</body>
+</html>

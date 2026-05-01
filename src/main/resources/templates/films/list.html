@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des Films</title>
+</head>
+<body>
+<h1>Films à l'affiche</h1>
+<a href="/films/nouveau">+ Ajouter un film</a>
+<table border="1">
+    <tr>
+        <th>Titre</th>
+        <th>Genre</th>
+        <th>Durée (min)</th>
+        <th>Actions</th>
+    </tr>
+    <tr th:each="film : ${films}">
+        <td th:text="${film.titre}"></td>
+        <td th:text="${film.genre}"></td>
+        <td th:text="${film.dureeMin}"></td>
+        <td>
+            <a th:href="@{/films/modifier/{id}(id=${film.id})}">Modifier</a>
+            <a th:href="@{/films/supprimer/{id}(id=${film.id})}">Supprimer</a>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

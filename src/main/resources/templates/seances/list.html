@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des Séances</title>
+</head>
+<body>
+<h1>Séances programmées</h1>
+<a href="/seances/nouveau">+ Ajouter une séance</a>
+<table border="1">
+    <tr>
+        <th>Film</th>
+        <th>Date/Heure</th>
+        <th>Salle</th>
+        <th>Version</th>
+        <th>Actions</th>
+    </tr>
+    <tr th:each="seance : ${seances}">
+        <td th:text="${seance.film.titre}"></td>
+        <td th:text="${seance.dateHeure}"></td>
+        <td th:text="${seance.salle}"></td>
+        <td th:text="${seance.version}"></td>
+        <td>
+            <a th:href="@{/seances/modifier/{id}(id=${seance.id})}">Modifier</a>
+            <a th:href="@{/seances/supprimer/{id}(id=${seance.id})}">Supprimer</a>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
