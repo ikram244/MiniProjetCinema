@@ -1,30 +1,145 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8"/>
     <title>Liste des Séances</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; min-height: 100vh; }
+        nav { background: #1a252f; padding: 14px 30px; display: flex; gap: 20px; }
+        nav a { color: #ecf0f1; text-decoration: none; font-weight: 600; font-size: 0.95em; padding: 6px 12px; border-radius: 4px; transition: background 0.2s; }
+        nav a:hover { background: #2c3e50; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h1 { color: #2c3e50; font-size: 1.8em; }
+        .btn-new { background: #2980b9; color: white; padding: 9px 18px; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 0.9em; transition: background 0.2s; }
+        .btn-new:hover { background: #1a6fa0; }
+
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 12px 16px; border-radius: 5px; margin-bottom: 16px; }
+
+        /* Filtres */
+        .filters { background: white; padding: 16px 20px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); margin-bottom: 20px; display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; }
+        .filters label { font-weight: 600; font-size: 0.88em; color: #555; display: flex; flex-direction: column; gap: 5px; }
+        .filters select, .filters input { padding: 7px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em; }
+        .btn-filter { background: #2980b9; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.9em; }
+        .btn-reset { color: #e74c3c; text-decoration: none; font-size: 0.9em; }
+
+        /* Tableau */
+        .table-wrap { background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th { background: #2c3e50; color: white; padding: 12px 14px; text-align: left; font-size: 0.88em; font-weight: 600; }
+        tbody td { padding: 11px 14px; border-bottom: 1px solid #f0f0f0; font-size: 0.9em; color: #333; vertical-align: middle; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #f8fafc; }
+
+        .badge-version { background: #dbeafe; color: #1d4ed8; border-radius: 4px; padding: 3px 9px; font-size: 0.8em; font-weight: 700; }
+
+        .actions { display: flex; gap: 6px; align-items: center; }
+        .actions a, .actions button { font-size: 0.82em; padding: 4px 9px; border-radius: 4px; cursor: pointer; text-decoration: none; border: none; font-weight: 600; transition: opacity 0.15s; }
+        .actions a:hover, .actions button:hover { opacity: 0.8; }
+        .btn-edit   { background: #eaf3fb; color: #2980b9; }
+        .btn-billet { background: #d4f4e3; color: #1a7a45; }
+        .btn-delete { background: #fde8e8; color: #c0392b; }
+        .empty-row td { text-align: center; color: #aaa; padding: 30px; }
+
+        /* Stats remplissage */
+        .stats-section { background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 20px; margin-top: 24px; }
+        .stats-section h2 { color: #2c3e50; font-size: 1.1em; margin-bottom: 16px; }
+        .stat-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; font-size: 0.88em; }
+        .stat-label { min-width: 280px; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .progress-bar { flex: 1; height: 13px; background: #eee; border-radius: 7px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 7px; background: #27ae60; transition: width 0.4s ease; }
+        .stat-count { font-size: 0.85em; color: #666; min-width: 110px; text-align: right; }
+    </style>
 </head>
 <body>
-<h1>Séances programmées</h1>
-<a href="/seances/nouveau">+ Ajouter une séance</a>
-<table border="1">
-    <tr>
-        <th>Film</th>
-        <th>Date/Heure</th>
-        <th>Salle</th>
-        <th>Version</th>
-        <th>Actions</th>
-    </tr>
-    <tr th:each="seance : ${seances}">
-        <td th:text="${seance.film.titre}"></td>
-        <td th:text="${seance.dateHeure}"></td>
-        <td th:text="${seance.salle}"></td>
-        <td th:text="${seance.version}"></td>
-        <td>
-            <a th:href="@{/seances/modifier/{id}(id=${seance.id})}">Modifier</a>
-            <a th:href="@{/seances/supprimer/{id}(id=${seance.id})}">Supprimer</a>
-        </td>
-    </tr>
-</table>
+
+<nav>
+    <a href="/films">🎬 Films</a>
+    <a href="/seances">🕐 Séances</a>
+    <a href="/billets">🎟️ Billets</a>
+</nav>
+
+<div class="container">
+    <div class="alert-success" th:if="${success}" th:text="${success}"></div>
+
+    <div class="header-row">
+        <h1>🕐 Séances programmées</h1>
+        <a href="/seances/nouvelle" class="btn-new">+ Nouvelle séance</a>
+    </div>
+
+    <!-- Filtres -->
+    <form class="filters" method="get" action="/seances">
+        <label>Salle :
+            <select name="salle">
+                <option value="">Toutes</option>
+                <option th:each="s : ${salles}" th:value="${s}" th:text="${s}"
+                        th:selected="${s == salleSelectionnee}"></option>
+            </select>
+        </label>
+        <label>Date :
+            <input type="date" name="date" th:value="${dateSelectionnee}"/>
+        </label>
+        <button type="submit" class="btn-filter">🔍 Filtrer</button>
+        <a href="/seances" class="btn-reset">✖ Réinitialiser</a>
+    </form>
+
+    <!-- Tableau -->
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Film</th>
+                <th>Date / Heure</th>
+                <th>Salle</th>
+                <th>Version</th>
+                <th>Capacité</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="empty-row" th:if="${#lists.isEmpty(seances)}">
+                <td colspan="7">Aucune séance trouvée.</td>
+            </tr>
+            <tr th:each="seance : ${seances}">
+                <td th:text="${seance.id}"></td>
+                <td><strong th:text="${seance.film.titre}"></strong></td>
+                <td th:text="${#temporals.format(seance.dateHeure, 'dd/MM/yyyy HH:mm')}"></td>
+                <td th:text="${seance.salle}"></td>
+                <td><span class="badge-version" th:text="${seance.version}"></span></td>
+                <td th:text="${seance.capacite}"></td>
+                <td>
+                    <div class="actions">
+                        <a class="btn-edit"   th:href="@{/seances/{id}/modifier(id=${seance.id})}">✏️ Modifier</a>
+                        <a class="btn-billet" th:href="@{/billets(seanceId=${seance.id})}">🎟️ Billets</a>
+                        <!-- Suppression via POST -->
+                        <form th:action="@{/seances/{id}/supprimer(id=${seance.id})}" method="post"
+                              onsubmit="return confirm('Supprimer cette séance et tous ses billets ?')">
+                            <button type="submit" class="btn-delete">🗑️ Supprimer</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Taux de remplissage -->
+    <div class="stats-section" th:if="${not #lists.isEmpty(tauxRemplissage)}">
+        <h2>📊 Taux de remplissage par séance</h2>
+        <div th:each="stat : ${tauxRemplissage}" class="stat-row">
+            <span class="stat-label"
+                  th:text="${stat['film'] + ' — ' + stat['salle'] + ' — ' + #temporals.format(stat['dateHeure'], 'dd/MM/yyyy HH:mm')}"></span>
+            <div class="progress-bar">
+                <div class="progress-fill"
+                     th:style="'width:' + ${stat['taux']} + '%'"></div>
+            </div>
+            <span class="stat-count"
+                  th:text="${stat['nbVendus'] + '/' + stat['capacite'] + ' (' + stat['taux'] + '%)'}"></span>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

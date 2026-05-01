@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Statistiques Séances</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; min-height: 100vh; }
+        nav { background: #1a252f; padding: 14px 30px; display: flex; gap: 20px; }
+        nav a { color: #ecf0f1; text-decoration: none; font-weight: 600; font-size: 0.95em; padding: 6px 12px; border-radius: 4px; }
+        nav a:hover { background: #2c3e50; }
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        h1 { color: #2c3e50; font-size: 1.8em; margin-bottom: 24px; }
+        .card { background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 24px; }
+        .stat-row { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; font-size: 0.88em; }
+        .stat-label { min-width: 300px; color: #444; }
+        .progress-bar { flex: 1; height: 14px; background: #eee; border-radius: 7px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 7px; background: #27ae60; }
+        .stat-count { min-width: 120px; text-align: right; color: #555; font-weight: 600; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #2980b9; text-decoration: none; font-size: 0.9em; }
+        .empty { color: #aaa; text-align: center; padding: 40px; }
+    </style>
+</head>
+<body>
+<nav>
+    <a href="/films">🎬 Films</a>
+    <a href="/seances">🕐 Séances</a>
+    <a href="/billets">🎟️ Billets</a>
+</nav>
+<div class="container">
+    <a href="/seances" class="back-link">← Retour aux séances</a>
+    <h1>📊 Taux de remplissage par séance</h1>
+    <div class="card">
+        <div th:if="${#lists.isEmpty(stats)}" class="empty">Aucune donnée disponible.</div>
+        <div th:each="stat : ${stats}" class="stat-row">
+            <span class="stat-label"
+                  th:text="${stat['film'] + ' — ' + stat['salle'] + ' — ' + #temporals.format(stat['dateHeure'], 'dd/MM/yyyy HH:mm')}"></span>
+            <div class="progress-bar">
+                <div class="progress-fill" th:style="'width:' + ${stat['taux']} + '%'"></div>
+            </div>
+            <span class="stat-count"
+                  th:text="${stat['nbVendus'] + '/' + stat['capacite'] + ' (' + stat['taux'] + '%)'}"></span>
+        </div>
+    </div>
+</div>
+</body>
+</html>

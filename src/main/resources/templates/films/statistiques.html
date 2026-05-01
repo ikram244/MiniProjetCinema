@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Statistiques Films</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; min-height: 100vh; }
+        nav { background: #1a252f; padding: 14px 30px; display: flex; gap: 20px; }
+        nav a { color: #ecf0f1; text-decoration: none; font-weight: 600; font-size: 0.95em; padding: 6px 12px; border-radius: 4px; transition: background 0.2s; }
+        nav a:hover { background: #2c3e50; }
+        .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+        h1 { color: #2c3e50; font-size: 1.8em; margin-bottom: 24px; }
+        .card { background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 24px; }
+        .film-row { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid #f0f0f0; }
+        .film-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .film-titre { min-width: 220px; font-weight: 600; color: #2c3e50; font-size: 0.95em; }
+        .bar-wrap { flex: 1; height: 18px; background: #eee; border-radius: 9px; overflow: hidden; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, #8e44ad, #2980b9); border-radius: 9px; transition: width 0.5s; }
+        .recette { min-width: 100px; text-align: right; font-weight: 700; color: #27ae60; font-size: 0.95em; }
+        .empty { color: #aaa; text-align: center; padding: 40px; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #2980b9; text-decoration: none; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+<nav>
+    <a href="/films">🎬 Films</a>
+    <a href="/seances">🕐 Séances</a>
+    <a href="/billets">🎟️ Billets</a>
+</nav>
+<div class="container">
+    <a href="/films" class="back-link">← Retour aux films</a>
+    <h1>💰 Recettes par film</h1>
+    <div class="card">
+        <div th:if="${#lists.isEmpty(recettes)}" class="empty">Aucune donnée disponible.</div>
+        <div th:each="r : ${recettes}" class="film-row">
+            <span class="film-titre" th:text="${r['titre']}"></span>
+            <div class="bar-wrap">
+                <div class="bar-fill" th:style="'width:' + (${r['recettes']} > 0 ? '100' : '0') + '%'"></div>
+            </div>
+            <span class="recette" th:text="${#numbers.formatDecimal(r['recettes'], 1, 2) + ' €'}"></span>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,18 +1,75 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Formulaire Film</title>
+    <meta charset="UTF-8"/>
+    <title th:text="${titre_page}">Film</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; min-height: 100vh; }
+        nav { background: #1a252f; padding: 14px 30px; display: flex; gap: 20px; }
+        nav a { color: #ecf0f1; text-decoration: none; font-weight: 600; font-size: 0.95em; padding: 6px 12px; border-radius: 4px; transition: background 0.2s; }
+        nav a:hover { background: #2c3e50; }
+        .container { max-width: 580px; margin: 40px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.09); padding: 32px; }
+        h1 { color: #2c3e50; font-size: 1.5em; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid #f0f0f0; }
+        label { display: block; margin-bottom: 16px; font-weight: 600; font-size: 0.9em; color: #444; }
+        label span { display: block; margin-bottom: 5px; }
+        input[type="text"], input[type="number"], select {
+            width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 5px;
+            font-size: 0.95em; color: #333; transition: border-color 0.2s;
+        }
+        input:focus, select:focus { outline: none; border-color: #8e44ad; box-shadow: 0 0 0 3px rgba(142,68,173,0.1); }
+        .error-msg { color: #e74c3c; font-size: 0.82em; font-weight: 500; margin-top: 4px; }
+        .form-actions { display: flex; gap: 12px; align-items: center; margin-top: 28px; }
+        .btn-primary { background: #8e44ad; color: white; padding: 11px 24px; border: none; border-radius: 5px; cursor: pointer; font-weight: 700; font-size: 0.95em; transition: background 0.2s; }
+        .btn-primary:hover { background: #6c3483; }
+        .btn-back { color: #2980b9; text-decoration: none; font-size: 0.9em; }
+    </style>
 </head>
 <body>
-<h1>Ajouter / Modifier un Film</h1>
-<form th:action="@{/films/enregistrer}" th:object="${film}" method="post">
-    <input type="hidden" th:field="*{id}"/>
-    <label>Titre : <input type="text" th:field="*{titre}"/></label><br/>
-    <label>Genre : <input type="text" th:field="*{genre}"/></label><br/>
-    <label>Durée (min) : <input type="number" th:field="*{dureeMin}"/></label><br/>
-    <button type="submit">Enregistrer</button>
-    <a href="/films">Annuler</a>
-</form>
+
+<nav>
+    <a href="/films">🎬 Films</a>
+    <a href="/seances">🕐 Séances</a>
+    <a href="/billets">🎟️ Billets</a>
+</nav>
+
+<div class="container">
+    <div class="card">
+        <h1 th:text="${titre_page}">Film</h1>
+
+        <!-- ACTION CORRIGÉE : pointe vers /films (POST) -->
+        <form th:action="@{/films}" th:object="${film}" method="post">
+            <input type="hidden" th:field="*{id}"/>
+
+            <label>
+                <span>Titre *</span>
+                <input type="text" th:field="*{titre}" placeholder="Ex : Le Roi Lion" required/>
+                <span class="error-msg" th:if="${#fields.hasErrors('titre')}" th:errors="*{titre}"></span>
+            </label>
+
+            <label>
+                <span>Genre *</span>
+                <select th:field="*{genre}" required>
+                    <option value="">-- Choisir un genre --</option>
+                    <option th:each="g : ${genres}" th:value="${g}" th:text="${g}"></option>
+                </select>
+                <span class="error-msg" th:if="${#fields.hasErrors('genre')}" th:errors="*{genre}"></span>
+            </label>
+
+            <label>
+                <span>Durée (minutes) *</span>
+                <input type="number" th:field="*{dureeMin}" placeholder="Ex : 120" min="1" required/>
+                <span class="error-msg" th:if="${#fields.hasErrors('dureeMin')}" th:errors="*{dureeMin}"></span>
+            </label>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">💾 Enregistrer</button>
+                <a href="/films" class="btn-back">← Retour à la liste</a>
+            </div>
+        </form>
+    </div>
+</div>
+
 </body>
 </html>

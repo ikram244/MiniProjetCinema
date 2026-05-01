@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${titre_page}">Billet</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; min-height: 100vh; }
+        nav { background: #1a252f; padding: 14px 30px; display: flex; gap: 20px; }
+        nav a { color: #ecf0f1; text-decoration: none; font-weight: 600; font-size: 0.95em; padding: 6px 12px; border-radius: 4px; transition: background 0.2s; }
+        nav a:hover { background: #2c3e50; }
+        .container { max-width: 620px; margin: 40px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.09); padding: 32px; }
+        h1 { color: #2c3e50; font-size: 1.5em; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid #f0f0f0; }
+        label { display: block; margin-bottom: 16px; font-weight: 600; font-size: 0.9em; color: #444; }
+        label span { display: block; margin-bottom: 5px; }
+        input[type="number"], input[type="date"], select {
+            width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 5px;
+            font-size: 0.95em; color: #333; transition: border-color 0.2s;
+        }
+        input:focus, select:focus { outline: none; border-color: #27ae60; box-shadow: 0 0 0 3px rgba(39,174,96,0.1); }
+        .error-msg { color: #e74c3c; font-size: 0.82em; font-weight: 500; margin-top: 4px; }
+        .form-actions { display: flex; gap: 12px; align-items: center; margin-top: 28px; }
+        .btn-primary { background: #27ae60; color: white; padding: 11px 24px; border: none; border-radius: 5px; cursor: pointer; font-weight: 700; font-size: 0.95em; transition: background 0.2s; }
+        .btn-primary:hover { background: #1e8449; }
+        .btn-back { color: #2980b9; text-decoration: none; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="/films">🎬 Films</a>
+    <a href="/seances">🕐 Séances</a>
+    <a href="/billets">🎟️ Billets</a>
+</nav>
+
+<div class="container">
+    <div class="card">
+        <h1 th:text="${titre_page}">Billet</h1>
+
+        <!--
+            ACTION CORRIGÉE : pointe vers /billets (POST)
+            - Si billet.id == null  → crée (POST /billets)
+            - Si billet.id != null  → modifie (POST /billets, id caché)
+        -->
+        <form th:action="@{/billets}" th:object="${billet}" method="post">
+            <input type="hidden" th:field="*{id}"/>
+
+            <!-- Séance -->
+            <label>
+                <span>Séance *</span>
+                <select name="seanceId" required>
+                    <option value="">-- Choisir une séance --</option>
+                    <option th:each="seance : ${seances}"
+                            th:value="${seance.id}"
+                            th:text="${seance.film.titre + ' — ' + seance.salle + ' — ' + #temporals.format(seance.dateHeure, 'dd/MM/yyyy HH:mm')}"
+                            th:selected="${billet.seance != null and billet.seance.id == seance.id}">
+                    </option>
+                </select>
+                <span class="error-msg" th:if="${#fields.hasErrors('seance')}" th:errors="*{seance}"></span>
+            </label>
+
+            <!-- Prix -->
+            <label>
+                <span>Prix (€) *</span>
+                <input type="number" step="0.01" min="0.01" th:field="*{prix}" placeholder="Ex : 12.50" required/>
+                <span class="error-msg" th:if="${#fields.hasErrors('prix')}" th:errors="*{prix}"></span>
+            </label>
+
+            <!-- Statut -->
+            <label>
+                <span>Statut *</span>
+                <select th:field="*{statut}" required>
+                    <option value="">-- Choisir un statut --</option>
+                    <option th:each="s : ${statuts}" th:value="${s}" th:text="${s}"></option>
+                </select>
+                <span class="error-msg" th:if="${#fields.hasErrors('statut')}" th:errors="*{statut}"></span>
+            </label>
+
+            <!-- Date d'achat -->
+            <label>
+                <span>Date d'achat</span>
+                <input type="date" th:field="*{dateAchat}"/>
+            </label>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">💾 Enregistrer</button>
+                <a href="/billets" class="btn-back">← Retour à la liste</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

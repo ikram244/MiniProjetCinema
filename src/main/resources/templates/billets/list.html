@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Liste des Billets</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; min-height: 100vh; }
+        nav { background: #1a252f; padding: 14px 30px; display: flex; gap: 20px; align-items: center; }
+        nav a { color: #ecf0f1; text-decoration: none; font-weight: 600; font-size: 0.95em; padding: 6px 12px; border-radius: 4px; transition: background 0.2s; }
+        nav a:hover { background: #2c3e50; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        h1 { color: #2c3e50; font-size: 1.8em; margin-bottom: 6px; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-new { background: #27ae60; color: white; padding: 9px 18px; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 0.9em; transition: background 0.2s; }
+        .btn-new:hover { background: #1e8449; }
+
+        /* Flash messages */
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 12px 16px; border-radius: 5px; margin-bottom: 16px; }
+
+        /* Statistiques */
+        .stats-bar { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+        .stat-card { background: white; border-radius: 8px; padding: 14px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); flex: 1; min-width: 140px; }
+        .stat-card .label { font-size: 0.78em; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card .value { font-size: 1.5em; font-weight: 700; color: #2c3e50; margin-top: 4px; }
+        .stat-card .value.green { color: #27ae60; }
+
+        /* Filtres */
+        .filters { background: white; padding: 16px 20px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); margin-bottom: 20px; display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+        .filters label { font-weight: 600; font-size: 0.88em; color: #555; display: flex; flex-direction: column; gap: 5px; }
+        .filters select { padding: 7px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em; }
+        .btn-filter { background: #2980b9; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.9em; }
+        .btn-filter:hover { background: #1a6fa0; }
+        .btn-reset { color: #e74c3c; text-decoration: none; font-size: 0.9em; padding: 8px 0; }
+
+        /* Tableau */
+        .table-wrap { background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th { background: #2c3e50; color: white; padding: 12px 14px; text-align: left; font-size: 0.88em; font-weight: 600; }
+        tbody td { padding: 11px 14px; border-bottom: 1px solid #f0f0f0; font-size: 0.9em; color: #333; vertical-align: middle; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #f8fafc; }
+
+        .badge { border-radius: 4px; padding: 3px 9px; font-size: 0.78em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-vendu  { background: #d4f4e3; color: #1a7a45; }
+        .badge-annule { background: #fde8e8; color: #c0392b; }
+        .badge-reserve{ background: #fef3cd; color: #856404; }
+
+        /* Actions inline via forms */
+        .actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .actions a, .actions button {
+            font-size: 0.82em; padding: 4px 9px; border-radius: 4px; cursor: pointer;
+            text-decoration: none; border: none; font-weight: 600; transition: opacity 0.15s;
+        }
+        .actions a:hover, .actions button:hover { opacity: 0.8; }
+        .btn-edit    { background: #eaf3fb; color: #2980b9; }
+        .btn-cancel  { background: #fef3cd; color: #8a6900; }
+        .btn-confirm { background: #d4f4e3; color: #1a7a45; }
+        .btn-delete  { background: #fde8e8; color: #c0392b; }
+
+        .empty-row td { text-align: center; color: #aaa; padding: 30px; font-size: 0.95em; }
+
+        /* Répartition statuts */
+        .repartition { background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 18px 20px; margin-top: 20px; }
+        .repartition h2 { color: #2c3e50; font-size: 1.1em; margin-bottom: 14px; }
+        .rep-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .rep-label { min-width: 90px; font-size: 0.85em; font-weight: 600; color: #555; }
+        .rep-bar { flex: 1; height: 12px; background: #eee; border-radius: 6px; overflow: hidden; }
+        .rep-fill { height: 100%; border-radius: 6px; }
+        .rep-count { font-size: 0.85em; color: #666; min-width: 30px; text-align: right; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="/films">🎬 Films</a>
+    <a href="/seances">🕐 Séances</a>
+    <a href="/billets">🎟️ Billets</a>
+</nav>
+
+<div class="container">
+    <!-- Flash message -->
+    <div class="alert-success" th:if="${success}" th:text="${success}"></div>
+
+    <div class="header-row">
+        <h1>🎟️ Gestion des Billets</h1>
+        <a href="/billets/nouveau" class="btn-new">+ Vendre un billet</a>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="label">Total recettes</div>
+            <div class="value green" th:text="${#numbers.formatDecimal(totalRecettes, 1, 2) + ' €'}">0.00 €</div>
+        </div>
+        <div class="stat-card" th:each="entry : ${repartition}">
+            <div class="label" th:text="${entry.key}">STATUT</div>
+            <div class="value" th:text="${entry.value}">0</div>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <form class="filters" method="get" action="/billets">
+        <label>Statut :
+            <select name="statut">
+                <option value="">Tous</option>
+                <option th:each="s : ${statuts}" th:value="${s}" th:text="${s}"
+                        th:selected="${s == statutSelectionne}"></option>
+            </select>
+        </label>
+        <button type="submit" class="btn-filter">🔍 Filtrer</button>
+        <a href="/billets" class="btn-reset">✖ Réinitialiser</a>
+    </form>
+
+    <!-- Tableau -->
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Film</th>
+                <th>Séance</th>
+                <th>Prix</th>
+                <th>Statut</th>
+                <th>Date d'achat</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="empty-row" th:if="${#lists.isEmpty(billets)}">
+                <td colspan="7">Aucun billet trouvé.</td>
+            </tr>
+            <tr th:each="billet : ${billets}">
+                <td th:text="${billet.id}"></td>
+                <td th:text="${billet.seance.film.titre}"></td>
+                <td th:text="${billet.seance.salle + ' — ' + #temporals.format(billet.seance.dateHeure,'dd/MM/yyyy HH:mm')}"></td>
+                <td th:text="${#numbers.formatDecimal(billet.prix, 1, 2) + ' €'}"></td>
+                <td>
+                    <span th:class="${billet.statut == 'VENDU'} ? 'badge badge-vendu' : (${billet.statut == 'ANNULE'} ? 'badge badge-annule' : 'badge badge-reserve')"
+                          th:text="${billet.statut}"></span>
+                </td>
+                <td th:text="${billet.dateAchat != null ? #temporals.format(billet.dateAchat,'dd/MM/yyyy') : '-'}"></td>
+                <td>
+                    <div class="actions">
+                        <!-- Modifier -->
+                        <a class="btn-edit" th:href="@{/billets/{id}/modifier(id=${billet.id})}">✏️ Modifier</a>
+
+                        <!-- Annuler (POST) -->
+                        <form th:if="${billet.statut == 'VENDU' or billet.statut == 'RESERVE'}"
+                              th:action="@{/billets/{id}/annuler(id=${billet.id})}" method="post"
+                              onsubmit="return confirm('Annuler ce billet ?')">
+                            <button type="submit" class="btn-cancel">❌ Annuler</button>
+                        </form>
+
+                        <!-- Confirmer (POST) -->
+                        <form th:if="${billet.statut == 'RESERVE' or billet.statut == 'ANNULE'}"
+                              th:action="@{/billets/{id}/confirmer(id=${billet.id})}" method="post">
+                            <button type="submit" class="btn-confirm">✅ Confirmer</button>
+                        </form>
+
+                        <!-- Supprimer (POST) -->
+                        <form th:action="@{/billets/{id}/supprimer(id=${billet.id})}" method="post"
+                              onsubmit="return confirm('Supprimer définitivement ce billet ?')">
+                            <button type="submit" class="btn-delete">🗑️ Supprimer</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Répartition par statut -->
+    <div class="repartition" th:if="${not #maps.isEmpty(repartition)}">
+        <h2>📊 Répartition par statut</h2>
+        <div th:each="entry : ${repartition}" class="rep-row">
+            <span class="rep-label" th:text="${entry.key}"></span>
+            <div class="rep-bar">
+                <div class="rep-fill"
+                     th:style="'width:' + (${entry.value} * 100 / (#maps.size(repartition) > 0 ? (#lists.size(billets) > 0 ? #lists.size(billets) : 1) : 1)) + '%; background:' + (${entry.key == 'VENDU'} ? '#27ae60' : (${entry.key == 'ANNULE'} ? '#e74c3c' : '#f39c12'))"></div>
+            </div>
+            <span class="rep-count" th:text="${entry.value}"></span>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${titre_page}">Séance</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; min-height: 100vh; }
+        nav { background: #1a252f; padding: 14px 30px; display: flex; gap: 20px; }
+        nav a { color: #ecf0f1; text-decoration: none; font-weight: 600; font-size: 0.95em; padding: 6px 12px; border-radius: 4px; transition: background 0.2s; }
+        nav a:hover { background: #2c3e50; }
+        .container { max-width: 580px; margin: 40px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.09); padding: 32px; }
+        h1 { color: #2c3e50; font-size: 1.5em; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid #f0f0f0; }
+        label { display: block; margin-bottom: 16px; font-weight: 600; font-size: 0.9em; color: #444; }
+        label span { display: block; margin-bottom: 5px; }
+        input[type="text"], input[type="number"], input[type="datetime-local"], select {
+            width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 5px;
+            font-size: 0.95em; color: #333; transition: border-color 0.2s;
+        }
+        input:focus, select:focus { outline: none; border-color: #2980b9; box-shadow: 0 0 0 3px rgba(41,128,185,0.1); }
+        .error-msg { color: #e74c3c; font-size: 0.82em; font-weight: 500; margin-top: 4px; }
+        .form-actions { display: flex; gap: 12px; align-items: center; margin-top: 28px; }
+        .btn-primary { background: #2980b9; color: white; padding: 11px 24px; border: none; border-radius: 5px; cursor: pointer; font-weight: 700; font-size: 0.95em; transition: background 0.2s; }
+        .btn-primary:hover { background: #1a6fa0; }
+        .btn-back { color: #2980b9; text-decoration: none; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="/films">🎬 Films</a>
+    <a href="/seances">🕐 Séances</a>
+    <a href="/billets">🎟️ Billets</a>
+</nav>
+
+<div class="container">
+    <div class="card">
+        <h1 th:text="${titre_page}">Séance</h1>
+
+        <!-- ACTION CORRIGÉE : pointe vers /seances (POST) -->
+        <form th:action="@{/seances}" th:object="${seance}" method="post">
+            <input type="hidden" th:field="*{id}"/>
+
+            <!-- Film -->
+            <label>
+                <span>Film *</span>
+                <select name="filmId" required>
+                    <option value="">-- Choisir un film --</option>
+                    <option th:each="film : ${films}"
+                            th:value="${film.id}"
+                            th:text="${film.titre + ' (' + film.dureeMin + ' min)'}"
+                            th:selected="${seance.film != null and seance.film.id == film.id}">
+                    </option>
+                </select>
+                <span class="error-msg" th:if="${#fields.hasErrors('film')}" th:errors="*{film}"></span>
+            </label>
+
+            <!-- Date et heure -->
+            <label>
+                <span>Date et Heure *</span>
+                <input type="datetime-local" th:field="*{dateHeure}" required/>
+                <span class="error-msg" th:if="${#fields.hasErrors('dateHeure')}" th:errors="*{dateHeure}"></span>
+            </label>
+
+            <!-- Salle -->
+            <label>
+                <span>Salle *</span>
+                <input type="text" th:field="*{salle}" placeholder="Ex : Salle 1" required/>
+                <span class="error-msg" th:if="${#fields.hasErrors('salle')}" th:errors="*{salle}"></span>
+            </label>
+
+            <!-- Version -->
+            <label>
+                <span>Version *</span>
+                <select th:field="*{version}" required>
+                    <option value="">-- Choisir --</option>
+                    <option th:each="v : ${versions}" th:value="${v}" th:text="${v}"></option>
+                </select>
+                <span class="error-msg" th:if="${#fields.hasErrors('version')}" th:errors="*{version}"></span>
+            </label>
+
+            <!-- Capacité -->
+            <label>
+                <span>Capacité (places)</span>
+                <input type="number" th:field="*{capacite}" min="1" placeholder="100"/>
+                <span class="error-msg" th:if="${#fields.hasErrors('capacite')}" th:errors="*{capacite}"></span>
+            </label>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">💾 Enregistrer</button>
+                <a href="/seances" class="btn-back">← Retour à la liste</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
