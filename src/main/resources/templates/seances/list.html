@@ -2,144 +2,279 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
-    <title>Liste des Séances</title>
+    <title>Séances</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; min-height: 100vh; }
-        nav { background: #1a252f; padding: 14px 30px; display: flex; gap: 20px; }
-        nav a { color: #ecf0f1; text-decoration: none; font-weight: 600; font-size: 0.95em; padding: 6px 12px; border-radius: 4px; transition: background 0.2s; }
-        nav a:hover { background: #2c3e50; }
-        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
-        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        h1 { color: #2c3e50; font-size: 1.8em; }
-        .btn-new { background: #2980b9; color: white; padding: 9px 18px; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 0.9em; transition: background 0.2s; }
-        .btn-new:hover { background: #1a6fa0; }
+        :root {
+            --bg: #0a0514;
+            --card: rgba(30,20,50,0.85);
+            --card2: rgba(20,12,38,0.9);
+            --purple: #7b58ad;
+            --purple-light: #9b6fd4;
+            --purple-glow: rgba(123,88,173,0.3);
+            --blue: #1e90ff;
+            --text: #e0e8f0;
+            --muted: #8a7fa6;
+            --border: rgba(123,88,173,0.2);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
 
-        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 12px 16px; border-radius: 5px; margin-bottom: 16px; }
+        body {
+            min-height:100vh; color:var(--text);
+            background: url('https://img.freepik.com/photos-gratuite/collage-fond-film_23-2149876003.jpg') center/cover fixed;
+            position:relative;
+        }
+        body::before {
+            content:''; position:fixed; inset:0;
+            background:rgba(8,3,18,0.88); z-index:0;
+        }
+        nav, .container { position:relative; z-index:1; }
 
-        /* Filtres */
-        .filters { background: white; padding: 16px 20px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); margin-bottom: 20px; display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; }
-        .filters label { font-weight: 600; font-size: 0.88em; color: #555; display: flex; flex-direction: column; gap: 5px; }
-        .filters select, .filters input { padding: 7px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em; }
-        .btn-filter { background: #2980b9; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.9em; }
-        .btn-reset { color: #e74c3c; text-decoration: none; font-size: 0.9em; }
+        nav {
+            background:rgba(10,5,20,0.95); padding:1rem 5%;
+            display:flex; justify-content:space-between; align-items:center;
+            border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100;
+            backdrop-filter:blur(10px);
+            animation:slideDown .5s ease;
+        }
+        @keyframes slideDown { from{transform:translateY(-100%);opacity:0} to{transform:translateY(0);opacity:1} }
+        @keyframes fadeUp    { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
 
-        /* Tableau */
-        .table-wrap { background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
-        table { width: 100%; border-collapse: collapse; }
-        thead th { background: #2c3e50; color: white; padding: 12px 14px; text-align: left; font-size: 0.88em; font-weight: 600; }
-        tbody td { padding: 11px 14px; border-bottom: 1px solid #f0f0f0; font-size: 0.9em; color: #333; vertical-align: middle; }
-        tbody tr:last-child td { border-bottom: none; }
-        tbody tr:hover { background: #f8fafc; }
+        .logo { font-size:1.3rem; font-weight:700; color:var(--purple-light); letter-spacing:2px; }
+        .nav-links { display:flex; gap:8px; }
+        .nav-links a { color:var(--text); text-decoration:none; font-size:.9rem; padding:7px 14px; border-radius:8px; transition:all .2s; }
+        .nav-links a:hover { background:rgba(123,88,173,.2); color:var(--purple-light); }
 
-        .badge-version { background: #dbeafe; color: #1d4ed8; border-radius: 4px; padding: 3px 9px; font-size: 0.8em; font-weight: 700; }
+        .container { padding:2rem 5%; max-width:1400px; margin:0 auto; }
 
-        .actions { display: flex; gap: 6px; align-items: center; }
-        .actions a, .actions button { font-size: 0.82em; padding: 4px 9px; border-radius: 4px; cursor: pointer; text-decoration: none; border: none; font-weight: 600; transition: opacity 0.15s; }
-        .actions a:hover, .actions button:hover { opacity: 0.8; }
-        .btn-edit   { background: #eaf3fb; color: #2980b9; }
-        .btn-billet { background: #d4f4e3; color: #1a7a45; }
-        .btn-delete { background: #fde8e8; color: #c0392b; }
-        .empty-row td { text-align: center; color: #aaa; padding: 30px; }
+        .header-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; animation:fadeUp .5s ease; }
+        h1 { font-size:1.8rem; text-transform:uppercase; letter-spacing:3px; }
 
-        /* Stats remplissage */
-        .stats-section { background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 20px; margin-top: 24px; }
-        .stats-section h2 { color: #2c3e50; font-size: 1.1em; margin-bottom: 16px; }
-        .stat-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; font-size: 0.88em; }
-        .stat-label { min-width: 280px; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .progress-bar { flex: 1; height: 13px; background: #eee; border-radius: 7px; overflow: hidden; }
-        .progress-fill { height: 100%; border-radius: 7px; background: #27ae60; transition: width 0.4s ease; }
-        .stat-count { font-size: 0.85em; color: #666; min-width: 110px; text-align: right; }
+        /* ── NOUVEAU STYLE BOUTONS ── */
+        .btn-new, .btn-edit, .btn-primary, .btn-filter {
+            background: linear-gradient(135deg, #6a35c8, #9b6fd4);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 7px 16px;
+            font-size: .82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(123,88,173,0.5);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .btn-new:hover, .btn-edit:hover, .btn-primary:hover, .btn-filter:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(123,88,173,0.7);
+            filter: brightness(1.1);
+        }
+        .btn-delete {
+            background: linear-gradient(135deg, #8b1a1a, #c0392b);
+            color: white; border: none; border-radius: 50px;
+            padding: 7px 16px; font-size: .82rem; font-weight: 700; cursor: pointer;
+            transition: all 0.3s; box-shadow: 0 4px 20px rgba(192,57,43,0.4);
+        }
+        .btn-delete:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn-billet {
+            background: linear-gradient(135deg, #7a5c00, #c9a84c);
+            color: #fff8e1; border: none; border-radius: 50px;
+            padding: 7px 16px; font-size: .82rem; font-weight: 700; cursor: pointer;
+            transition: all 0.3s; box-shadow: 0 4px 20px rgba(180,140,40,0.35);
+            text-decoration: none; display: inline-block; text-align: center;
+        }
+        .btn-billet:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn-reset { color: #e74c3c; text-decoration: none; font-size: .9rem; border-radius: 50px; }
+
+        .alert-success { background:rgba(13,43,26,.9); color:#6fcf97; border:1px solid #1a5c35; padding:12px 16px; border-radius:10px; margin-bottom:16px; }
+
+        .filters {
+            background:var(--card); padding:16px 20px; border-radius:14px;
+            border:1px solid var(--border); margin-bottom:24px;
+            display:flex; gap:14px; align-items:flex-end; flex-wrap:wrap;
+            backdrop-filter:blur(10px);
+            animation:fadeUp .5s .1s ease both;
+        }
+        .filters label { font-weight:600; font-size:.85rem; color:var(--muted); display:flex; flex-direction:column; gap:5px; }
+        .filters select, .filters input {
+            padding:9px 14px; border:1px solid var(--border); border-radius:8px;
+            font-size:.9rem; background:rgba(10,5,20,.8); color:var(--text);
+        }
+        .filters select:focus, .filters input:focus { outline:none; border-color:var(--purple); }
+
+        .seances-grid {
+            display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+            gap:20px; animation:fadeUp .5s .2s ease both;
+        }
+
+        .seance-card {
+            background:var(--card); border-radius:16px; border:1px solid var(--border);
+            overflow:hidden; transition:transform .3s,box-shadow .3s,border-color .3s;
+            opacity:0; animation:fadeUp .6s ease forwards;
+            backdrop-filter:blur(10px);
+        }
+        .seance-card:nth-child(1){animation-delay:.1s}
+        .seance-card:nth-child(2){animation-delay:.2s}
+        .seance-card:nth-child(3){animation-delay:.3s}
+        .seance-card:nth-child(4){animation-delay:.4s}
+        .seance-card:nth-child(5){animation-delay:.5s}
+        .seance-card:nth-child(6){animation-delay:.6s}
+        .seance-card:hover { transform:translateY(-6px); box-shadow:0 12px 30px rgba(0,0,0,.5); border-color:var(--purple); }
+
+        .card-poster {
+            width:100%; height:180px; object-fit:cover; display:block;
+        }
+        .card-poster-placeholder {
+            width:100%; height:180px; background:linear-gradient(135deg,#1a0a2e,#2d1b4e);
+            display:flex; align-items:center; justify-content:center;
+            font-size:3rem;
+        }
+
+        .card-body { padding:16px; }
+
+        /* Poster wrapper pour positionner la corbeille */
+        .card-poster-wrap { position:relative; }
+        .btn-delete-top {
+            position:absolute; top:10px; right:10px;
+            background:rgba(0,0,0,0.55); border:none; border-radius:50%;
+            width:32px; height:32px; display:flex; align-items:center; justify-content:center;
+            color:rgba(255,255,255,0.75); font-size:.95rem; cursor:pointer;
+            transition:all .2s; backdrop-filter:blur(4px);
+        }
+        .btn-delete-top:hover { background:rgba(180,30,30,0.7); color:white; transform:scale(1.1); }
+
+        .card-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+        .film-name { font-size:1rem; font-weight:700; color:white; }
+
+        .time-btn {
+            background:linear-gradient(135deg,#4a2080,var(--purple));
+            color:white; border:none; padding:10px 16px; border-radius:10px;
+            font-size:1rem; font-weight:700; width:100%;
+            margin-bottom:12px; letter-spacing:1px;
+            box-shadow:0 4px 15px var(--purple-glow);
+        }
+
+        .card-info { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; align-items:center; }
+        .badge-vf   { background:rgba(123,88,173,.2); color:#c4a8f0; border:1px solid rgba(123,88,173,.3); border-radius:6px; padding:4px 10px; font-size:.75rem; font-weight:700; }
+        .badge-vost { background:rgba(30,144,255,.15); color:#64b5f6; border:1px solid rgba(30,144,255,.25); border-radius:6px; padding:4px 10px; font-size:.75rem; font-weight:700; }
+        .salle-badge { background:rgba(255,255,255,.06); color:var(--muted); border:1px solid var(--border); border-radius:6px; padding:4px 10px; font-size:.75rem; }
+        .cap-badge   { background:rgba(255,255,255,.06); color:var(--muted); border:1px solid var(--border); border-radius:6px; padding:4px 10px; font-size:.75rem; }
+
+        .card-actions { display:flex; gap:8px; align-items:center; }
+
+        .empty-msg { text-align:center; color:var(--muted); padding:60px; animation:fadeUp .5s ease; }
+
+        /* Donuts */
+        .stats-section { margin-top:32px; animation:fadeUp .5s .4s ease both; }
+        .stats-section h2 { font-size:1rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:16px; }
+        .donuts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:16px; }
+        .donut-card {
+            background:var(--card); border-radius:16px; border:1px solid var(--border);
+            padding:20px; display:flex; flex-direction:column; align-items:center; gap:10px;
+            backdrop-filter:blur(10px); transition:transform .3s;
+        }
+        .donut-card:hover { transform:translateY(-4px); }
+        .donut-wrap { position:relative; width:100px; height:100px; }
+        .donut-wrap svg { transform:rotate(-90deg); }
+        .donut-bg   { fill:none; stroke:rgba(123,88,173,.2); stroke-width:10; }
+        .donut-fill { fill:none; stroke:var(--purple-light); stroke-width:10; stroke-linecap:round; transition:stroke-dasharray 1.2s ease; }
+        .donut-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:1.1rem; font-weight:700; color:white; }
+        .donut-label { font-size:.75rem; color:var(--muted); text-align:center; line-height:1.4; }
     </style>
 </head>
 <body>
-
 <nav>
-    <a href="/films">🎬 Films</a>
-    <a href="/seances">🕐 Séances</a>
-    <a href="/billets">🎟️ Billets</a>
+    <div class="logo">🎬 CinéApp</div>
+    <div class="nav-links">
+        <a href="/films">Films</a>
+        <a href="/seances">Séances</a>
+        <a href="/billets">Billets</a>
+    </div>
 </nav>
 
 <div class="container">
     <div class="alert-success" th:if="${success}" th:text="${success}"></div>
-
     <div class="header-row">
-        <h1>🕐 Séances programmées</h1>
-        <a href="/seances/nouvelle" class="btn-new">+ Nouvelle séance</a>
+        <h1>🕐 Séances</h1>
+        <a href="/seances/nouvelle" class="btn-new">+</a>
     </div>
 
-    <!-- Filtres -->
     <form class="filters" method="get" action="/seances">
         <label>Salle :
             <select name="salle">
                 <option value="">Toutes</option>
-                <option th:each="s : ${salles}" th:value="${s}" th:text="${s}"
-                        th:selected="${s == salleSelectionnee}"></option>
+                <option th:each="s : ${salles}" th:value="${s}" th:text="${s}" th:selected="${s == salleSelectionnee}"></option>
             </select>
         </label>
         <label>Date :
             <input type="date" name="date" th:value="${dateSelectionnee}"/>
         </label>
-        <button type="submit" class="btn-filter">🔍 Filtrer</button>
-        <a href="/seances" class="btn-reset">✖ Réinitialiser</a>
+        <button type="submit" class="btn-filter">Filtrer</button>
     </form>
 
-    <!-- Tableau -->
-    <div class="table-wrap">
-        <table>
-            <thead>
-            <tr>
-                <th>#</th>
-                <th>Film</th>
-                <th>Date / Heure</th>
-                <th>Salle</th>
-                <th>Version</th>
-                <th>Capacité</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr class="empty-row" th:if="${#lists.isEmpty(seances)}">
-                <td colspan="7">Aucune séance trouvée.</td>
-            </tr>
-            <tr th:each="seance : ${seances}">
-                <td th:text="${seance.id}"></td>
-                <td><strong th:text="${seance.film.titre}"></strong></td>
-                <td th:text="${#temporals.format(seance.dateHeure, 'dd/MM/yyyy HH:mm')}"></td>
-                <td th:text="${seance.salle}"></td>
-                <td><span class="badge-version" th:text="${seance.version}"></span></td>
-                <td th:text="${seance.capacite}"></td>
-                <td>
-                    <div class="actions">
-                        <a class="btn-edit"   th:href="@{/seances/{id}/modifier(id=${seance.id})}">✏️ Modifier</a>
-                        <a class="btn-billet" th:href="@{/billets(seanceId=${seance.id})}">🎟️ Billets</a>
-                        <!-- Suppression via POST -->
-                        <form th:action="@{/seances/{id}/supprimer(id=${seance.id})}" method="post"
-                              onsubmit="return confirm('Supprimer cette séance et tous ses billets ?')">
-                            <button type="submit" class="btn-delete">🗑️ Supprimer</button>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Taux de remplissage -->
-    <div class="stats-section" th:if="${not #lists.isEmpty(tauxRemplissage)}">
-        <h2>📊 Taux de remplissage par séance</h2>
-        <div th:each="stat : ${tauxRemplissage}" class="stat-row">
-            <span class="stat-label"
-                  th:text="${stat['film'] + ' — ' + stat['salle'] + ' — ' + #temporals.format(stat['dateHeure'], 'dd/MM/yyyy HH:mm')}"></span>
-            <div class="progress-bar">
-                <div class="progress-fill"
-                     th:style="'width:' + ${stat['taux']} + '%'"></div>
+    <div class="seances-grid" th:if="${not #lists.isEmpty(seances)}">
+        <div class="seance-card" th:each="seance : ${seances}">
+            <!-- Poster + corbeille positionnée en haut à droite -->
+            <div class="card-poster-wrap">
+                <img th:if="${seance.film.imageUrl != null and !seance.film.imageUrl.isEmpty()}"
+                     th:src="${seance.film.imageUrl}" th:alt="${seance.film.titre}" class="card-poster"/>
+                <div th:unless="${seance.film.imageUrl != null and !seance.film.imageUrl.isEmpty()}"
+                     class="card-poster-placeholder">🎬</div>
+                <form th:action="@{/seances/{id}/supprimer(id=${seance.id})}" method="post"
+                      onsubmit="return confirm('Supprimer cette séance ?')" style="margin:0">
+                    <button type="submit" class="btn-delete-top" title="Supprimer">🗑</button>
+                </form>
             </div>
-            <span class="stat-count"
-                  th:text="${stat['nbVendus'] + '/' + stat['capacite'] + ' (' + stat['taux'] + '%)'}"></span>
+
+            <div class="card-body">
+                <div class="card-top">
+                    <span class="film-name" th:text="${seance.film.titre}"></span>
+                </div>
+                <button class="time-btn" th:text="${#temporals.format(seance.dateHeure,'HH:mm  —  dd/MM/yyyy')}"></button>
+                <div class="card-info">
+                    <span th:class="${seance.version == 'VF'} ? 'badge-vf' : 'badge-vost'" th:text="${seance.version}"></span>
+                    <span class="salle-badge" th:text="${seance.salle}"></span>
+                    <span class="cap-badge" th:text="'👥 ' + ${seance.capacite}"></span>
+                </div>
+                <div class="card-actions">
+                    <a class="btn-edit"   th:href="@{/seances/{id}/modifier(id=${seance.id})}">Modifier</a>
+                    <a class="btn-billet" th:href="@{/billets(seanceId=${seance.id})}">Billets</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="empty-msg" th:if="${#lists.isEmpty(seances)}">Aucune séance trouvée.</div>
+
+    <div class="stats-section" th:if="${not #lists.isEmpty(tauxRemplissage)}">
+        <h2>Taux de remplissage</h2>
+        <div class="donuts-grid">
+            <div class="donut-card" th:each="stat : ${tauxRemplissage}">
+                <div class="donut-wrap">
+                    <svg width="100" height="100" viewBox="0 0 100 100">
+                        <circle class="donut-bg" cx="50" cy="50" r="40"/>
+                        <circle class="donut-fill" cx="50" cy="50" r="40"
+                                th:attr="data-taux=${stat['taux']}"
+                                style="stroke-dasharray:0 252"/>
+                    </svg>
+                    <div class="donut-text" th:text="${stat['taux']} + '%'"></div>
+                </div>
+                <div class="donut-label" th:text="${stat['film'] + ' · ' + stat['salle']}"></div>
+                <div style="font-size:.78rem;color:#9b6fd4;font-weight:700;"
+                     th:text="${stat['nbVendus'] + '/' + stat['capacite'] + ' billets'}"></div>
+            </div>
         </div>
     </div>
 </div>
 
+<script>
+    setTimeout(() => {
+        document.querySelectorAll('.donut-fill').forEach(c => {
+            const t = parseFloat(c.dataset.taux) || 0;
+            const circ = 2 * Math.PI * 40;
+            c.style.strokeDasharray = (t/100*circ) + ' ' + circ;
+        });
+    }, 500);
+</script>
 </body>
 </html>

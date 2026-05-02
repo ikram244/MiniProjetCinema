@@ -3,15 +3,14 @@ package com.cinema.cinemaapp.controllers;
 import com.cinema.cinemaapp.entities.Seance;
 import com.cinema.cinemaapp.services.FilmService;
 import com.cinema.cinemaapp.services.SeanceService;
-import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -27,25 +26,19 @@ public class SeanceController {
         this.filmService   = filmService;
     }
 
-    // ===== LISTE + FILTRAGE =====
-
     @GetMapping
     public String list(@RequestParam(required = false) String salle,
                        @RequestParam(required = false)
                        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
                        Model model) {
         List<Seance> seances = seanceService.findBySalleAndDate(salle, date);
-
         model.addAttribute("seances",           seances);
         model.addAttribute("salles",            seanceService.findDistinctSalles());
         model.addAttribute("salleSelectionnee", salle);
         model.addAttribute("dateSelectionnee",  date);
-        // Ajouter les stats de remplissage pour la section statistiques
         model.addAttribute("tauxRemplissage",   seanceService.getTauxRemplissage());
         return "seances/list";
     }
-
-    // ===== STATISTIQUES =====
 
     @GetMapping("/statistiques")
     public String statistiques(Model model) {
@@ -53,8 +46,6 @@ public class SeanceController {
         model.addAttribute("stats", stats);
         return "seances/statistiques";
     }
-
-    // ===== FORMULAIRE CRÉATION =====
 
     @GetMapping("/nouvelle")
     public String showCreateForm(Model model) {
@@ -65,35 +56,62 @@ public class SeanceController {
         return "seances/form";
     }
 
-    // ===== ENREGISTREMENT =====
-
+    // ===== FIX : suppression @Valid, assignation film AVANT validation =====
     @PostMapping
-    public String save(@Valid @ModelAttribute("seance") Seance seance,
-                       BindingResult result,
+    public String save(@ModelAttribute("seance") Seance seance,
                        @RequestParam(required = false) Long filmId,
+                       @RequestParam(required = false) String salle,
+                       @RequestParam(required = false) String version,
+                       @RequestParam(required = false) String dateHeure,
+                       @RequestParam(required = false) Integer capacite,
                        Model model,
                        RedirectAttributes redirectAttributes) {
 
+        // 1 — Assigner le film en premier
         if (filmId != null) {
             filmService.findById(filmId).ifPresent(seance::setFilm);
         }
 
-        if (result.hasErrors() || seance.getFilm() == null) {
-            if (seance.getFilm() == null) {
-                result.rejectValue("film", "film.requis", "Veuillez sélectionner un film");
-            }
+        // 2 — Assigner les autres champs manuellement
+        if (salle != null && !salle.isBlank())     seance.setSalle(salle);
+        if (version != null && !version.isBlank()) seance.setVersion(version);
+        if (capacite != null)                       seance.setCapacite(capacite);
+        if (dateHeure != null && !dateHeure.isBlank()) {
+            seance.setDateHeure(LocalDateTime.parse(dateHeure));
+        }
+
+        // 3 — Validation manuelle
+        boolean hasError = false;
+
+        if (seance.getFilm() == null) {
+            model.addAttribute("erreurFilm", "Veuillez sélectionner un film");
+            hasError = true;
+        }
+        if (seance.getSalle() == null || seance.getSalle().isBlank()) {
+            model.addAttribute("erreurSalle", "La salle est obligatoire");
+            hasError = true;
+        }
+        if (seance.getVersion() == null || seance.getVersion().isBlank()) {
+            model.addAttribute("erreurVersion", "La version est obligatoire");
+            hasError = true;
+        }
+        if (seance.getDateHeure() == null) {
+            model.addAttribute("erreurDate", "La date et l'heure sont obligatoires");
+            hasError = true;
+        }
+
+        if (hasError) {
             model.addAttribute("films",      filmService.findAll());
             model.addAttribute("versions",   List.of("VF", "VOST", "VFQ", "VO"));
             model.addAttribute("titre_page", seance.getId() == null ? "Nouvelle séance" : "Modifier la séance");
             return "seances/form";
         }
 
+        // 4 — Sauvegarder
         seanceService.save(seance);
         redirectAttributes.addFlashAttribute("success", "Séance enregistrée avec succès.");
         return "redirect:/seances";
     }
-
-    // ===== FORMULAIRE MODIFICATION =====
 
     @GetMapping("/{id}/modifier")
     public String showEditForm(@PathVariable Long id, Model model) {
@@ -105,8 +123,6 @@ public class SeanceController {
         model.addAttribute("titre_page", "Modifier la séance");
         return "seances/form";
     }
-
-    // ===== SUPPRESSION =====
 
     @PostMapping("/{id}/supprimer")
     public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {

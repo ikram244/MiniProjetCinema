@@ -25,39 +25,35 @@ public class Film {
     @Column(nullable = false)
     private int dureeMin;
 
+    @Column(length = 500)
+    private String imageUrl;
+
     @OneToMany(mappedBy = "film", cascade = CascadeType.ALL)
     private List<Seance> seances;
-
-    // ===== Constructeurs =====
 
     public Film() {}
 
     public Film(String titre, String genre, int dureeMin) {
-        this.titre   = titre;
-        this.genre   = genre;
+        this.titre    = titre;
+        this.genre    = genre;
         this.dureeMin = dureeMin;
     }
 
-    // ===== Getters / Setters =====
-
-    public Long getId()                   { return id; }
-    public void setId(Long id)            { this.id = id; }
-
-    public String getTitre()              { return titre; }
-    public void setTitre(String titre)    { this.titre = titre; }
-
-    public String getGenre()              { return genre; }
-    public void setGenre(String genre)    { this.genre = genre; }
-
-    public int getDureeMin()              { return dureeMin; }
-    public void setDureeMin(int dureeMin) { this.dureeMin = dureeMin; }
-
-    public List<Seance> getSeances()      { return seances; }
-    public void setSeances(List<Seance> seances) { this.seances = seances; }
+    public Long getId()                              { return id; }
+    public void setId(Long id)                       { this.id = id; }
+    public String getTitre()                         { return titre; }
+    public void setTitre(String titre)               { this.titre = titre; }
+    public String getGenre()                         { return genre; }
+    public void setGenre(String genre)               { this.genre = genre; }
+    public int getDureeMin()                         { return dureeMin; }
+    public void setDureeMin(int dureeMin)            { this.dureeMin = dureeMin; }
+    public String getImageUrl()                      { return imageUrl; }
+    public void setImageUrl(String imageUrl)         { this.imageUrl = imageUrl; }
+    public List<Seance> getSeances()                 { return seances; }
+    public void setSeances(List<Seance> seances)     { this.seances = seances; }
 
     @Override
     public String toString() {
-        return "Film{id=" + id + ", titre='" + titre + "', genre='" + genre +
-                "', dureeMin=" + dureeMin + "}";
+        return "Film{id=" + id + ", titre='" + titre + "', genre='" + genre + "', dureeMin=" + dureeMin + "}";
     }
 }

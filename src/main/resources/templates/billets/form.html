@@ -4,92 +4,173 @@
     <meta charset="UTF-8"/>
     <title th:text="${titre_page}">Billet</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; min-height: 100vh; }
-        nav { background: #1a252f; padding: 14px 30px; display: flex; gap: 20px; }
-        nav a { color: #ecf0f1; text-decoration: none; font-weight: 600; font-size: 0.95em; padding: 6px 12px; border-radius: 4px; transition: background 0.2s; }
-        nav a:hover { background: #2c3e50; }
-        .container { max-width: 620px; margin: 40px auto; padding: 0 20px; }
-        .card { background: white; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.09); padding: 32px; }
-        h1 { color: #2c3e50; font-size: 1.5em; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid #f0f0f0; }
-        label { display: block; margin-bottom: 16px; font-weight: 600; font-size: 0.9em; color: #444; }
-        label span { display: block; margin-bottom: 5px; }
-        input[type="number"], input[type="date"], select {
-            width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 5px;
-            font-size: 0.95em; color: #333; transition: border-color 0.2s;
+        :root {
+            --bg:#0a0514; --card:rgba(30,20,50,0.85); --card2:rgba(20,12,38,0.9);
+            --purple:#7b58ad; --purple-light:#9b6fd4; --purple-glow:rgba(123,88,173,0.3);
+            --text:#e0e8f0; --muted:#8a7fa6; --border:rgba(123,88,173,0.2);
         }
-        input:focus, select:focus { outline: none; border-color: #27ae60; box-shadow: 0 0 0 3px rgba(39,174,96,0.1); }
-        .error-msg { color: #e74c3c; font-size: 0.82em; font-weight: 500; margin-top: 4px; }
-        .form-actions { display: flex; gap: 12px; align-items: center; margin-top: 28px; }
-        .btn-primary { background: #27ae60; color: white; padding: 11px 24px; border: none; border-radius: 5px; cursor: pointer; font-weight: 700; font-size: 0.95em; transition: background 0.2s; }
-        .btn-primary:hover { background: #1e8449; }
-        .btn-back { color: #2980b9; text-decoration: none; font-size: 0.9em; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+        body {
+            min-height:100vh; color:var(--text);
+            background:url('https://img.freepik.com/photos-gratuite/collage-fond-film_23-2149876003.jpg') center/cover fixed;
+        }
+        body::before { content:''; position:fixed; inset:0; background:rgba(8,3,18,0.88); z-index:0; }
+        nav, .container { position:relative; z-index:1; }
+
+        nav {
+            background:rgba(10,5,20,0.95); padding:1rem 5%;
+            display:flex; justify-content:space-between; align-items:center;
+            border-bottom:1px solid var(--border); backdrop-filter:blur(10px);
+        }
+        .logo { font-size:1.3rem; font-weight:700; color:var(--purple-light); letter-spacing:2px; }
+        .nav-links { display:flex; gap:8px; }
+        .nav-links a { color:var(--text); text-decoration:none; font-size:.9rem; padding:7px 14px; border-radius:8px; transition:all .2s; }
+        .nav-links a:hover { background:rgba(123,88,173,.2); color:var(--purple-light); }
+
+        .container { padding:2rem 5%; max-width:900px; margin:0 auto; animation:fadeUp .5s ease; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+        h1 { font-size:1.6rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:1.5rem; }
+
+        .layout { display:grid; grid-template-columns:200px 1fr; gap:24px; }
+
+        .poster-panel { display:flex; flex-direction:column; gap:12px; }
+        .poster-img { width:200px; height:300px; object-fit:cover; border-radius:14px; border:2px solid var(--border); display:block; }
+        .poster-placeholder { width:200px; height:300px; background:linear-gradient(135deg,#1a0a2e,#2d1b4e); border-radius:14px; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:3rem; }
+        .film-info-panel { background:var(--card); border-radius:12px; border:1px solid var(--border); padding:14px; backdrop-filter:blur(10px); }
+        .film-info-title { font-weight:700; font-size:1rem; color:white; margin-bottom:6px; }
+        .film-info-detail { font-size:.82rem; color:var(--muted); }
+
+        .form-card { background:var(--card); border-radius:16px; border:1px solid var(--border); padding:28px; backdrop-filter:blur(10px); }
+        label { display:block; margin-bottom:16px; font-weight:600; font-size:.88rem; color:var(--muted); }
+        label span { display:block; margin-bottom:6px; }
+        select, input[type="number"], input[type="date"] {
+            width:100%; padding:11px 14px; border:1px solid var(--border); border-radius:10px;
+            font-size:.95rem; background:rgba(10,5,20,.8); color:var(--text); transition:border-color .2s;
+        }
+        select:focus, input:focus { outline:none; border-color:var(--purple); box-shadow:0 0 0 3px var(--purple-glow); }
+        .error-msg { color:#e74c3c; font-size:.82rem; margin-top:4px; }
+
+        .form-actions { display:flex; gap:12px; align-items:center; margin-top:24px; }
+
+        /* ── NOUVEAU STYLE BOUTON ── */
+        .btn-primary {
+            background: linear-gradient(135deg, #6a35c8, #9b6fd4);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 7px 16px;
+            font-size: .82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(123,88,173,0.5);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(123,88,173,0.7);
+            filter: brightness(1.1);
+        }
+
+        .btn-back { color:var(--purple-light); text-decoration:none; font-size:.9rem; }
     </style>
 </head>
 <body>
-
 <nav>
-    <a href="/films">🎬 Films</a>
-    <a href="/seances">🕐 Séances</a>
-    <a href="/billets">🎟️ Billets</a>
+    <div class="logo">🎬 CinéApp</div>
+    <div class="nav-links">
+        <a href="/films">Films</a>
+        <a href="/seances">Séances</a>
+        <a href="/billets">Billets</a>
+    </div>
 </nav>
 
 <div class="container">
-    <div class="card">
-        <h1 th:text="${titre_page}">Billet</h1>
-
-        <!--
-            ACTION CORRIGÉE : pointe vers /billets (POST)
-            - Si billet.id == null  → crée (POST /billets)
-            - Si billet.id != null  → modifie (POST /billets, id caché)
-        -->
-        <form th:action="@{/billets}" th:object="${billet}" method="post">
-            <input type="hidden" th:field="*{id}"/>
-
-            <!-- Séance -->
-            <label>
-                <span>Séance *</span>
-                <select name="seanceId" required>
-                    <option value="">-- Choisir une séance --</option>
-                    <option th:each="seance : ${seances}"
-                            th:value="${seance.id}"
-                            th:text="${seance.film.titre + ' — ' + seance.salle + ' — ' + #temporals.format(seance.dateHeure, 'dd/MM/yyyy HH:mm')}"
-                            th:selected="${billet.seance != null and billet.seance.id == seance.id}">
-                    </option>
-                </select>
-                <span class="error-msg" th:if="${#fields.hasErrors('seance')}" th:errors="*{seance}"></span>
-            </label>
-
-            <!-- Prix -->
-            <label>
-                <span>Prix (€) *</span>
-                <input type="number" step="0.01" min="0.01" th:field="*{prix}" placeholder="Ex : 12.50" required/>
-                <span class="error-msg" th:if="${#fields.hasErrors('prix')}" th:errors="*{prix}"></span>
-            </label>
-
-            <!-- Statut -->
-            <label>
-                <span>Statut *</span>
-                <select th:field="*{statut}" required>
-                    <option value="">-- Choisir un statut --</option>
-                    <option th:each="s : ${statuts}" th:value="${s}" th:text="${s}"></option>
-                </select>
-                <span class="error-msg" th:if="${#fields.hasErrors('statut')}" th:errors="*{statut}"></span>
-            </label>
-
-            <!-- Date d'achat -->
-            <label>
-                <span>Date d'achat</span>
-                <input type="date" th:field="*{dateAchat}"/>
-            </label>
-
-            <div class="form-actions">
-                <button type="submit" class="btn-primary">💾 Enregistrer</button>
-                <a href="/billets" class="btn-back">← Retour à la liste</a>
+    <h1 th:text="${titre_page}">Billet</h1>
+    <div class="layout">
+        <div class="poster-panel">
+            <img id="posterImg" class="poster-img" src="" alt="Affiche" style="display:none"/>
+            <div id="posterPlaceholder" class="poster-placeholder">🎬</div>
+            <div class="film-info-panel" id="filmInfo" style="display:none">
+                <div class="film-info-title" id="filmTitle"></div>
+                <div class="film-info-detail" id="filmDetail"></div>
             </div>
-        </form>
+        </div>
+
+        <div class="form-card">
+            <form th:action="@{/billets}" method="post">
+                <input type="hidden" name="id" th:value="${billet.id}"/>
+
+                <label>
+                    <span>Séance *</span>
+                    <select name="seanceId" id="seanceSelect" required onchange="updatePoster(this)">
+                        <option value="">-- Choisir une séance --</option>
+                        <option th:each="seance : ${seances}"
+                                th:value="${seance.id}"
+                                th:text="${seance.film.titre + ' — ' + seance.salle + ' — ' + #temporals.format(seance.dateHeure,'dd/MM HH:mm')}"
+                                th:attr="data-poster=${seance.film.imageUrl != null ? seance.film.imageUrl : ''},
+                                         data-titre=${seance.film.titre},
+                                         data-genre=${seance.film.genre},
+                                         data-duree=${seance.film.dureeMin}"
+                                th:selected="${billet.seance != null and billet.seance.id == seance.id}">
+                        </option>
+                    </select>
+                </label>
+
+                <label>
+                    <span>Prix (DH) *</span>
+                    <input type="number" step="0.01" min="0.01" name="prix" th:value="${billet.prix}" placeholder="Ex : 120.00" required/>
+                </label>
+
+                <label>
+                    <span>Statut *</span>
+                    <select name="statut" required>
+                        <option value="">-- Choisir --</option>
+                        <option th:each="s : ${statuts}" th:value="${s}" th:text="${s}"
+                                th:selected="${billet.statut == s}"></option>
+                    </select>
+                </label>
+
+                <label>
+                    <span>Date d'achat</span>
+                    <input type="date" name="dateAchat" th:value="${billet.dateAchat}"/>
+                </label>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Enregistrer</button>
+                    <a href="/billets" class="btn-back">← Retour</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
+<script>
+    function updatePoster(select) {
+        const opt = select.options[select.selectedIndex];
+        const poster = opt.dataset.poster;
+        const img = document.getElementById('posterImg');
+        const ph  = document.getElementById('posterPlaceholder');
+        const fi  = document.getElementById('filmInfo');
+
+        if (poster && poster.startsWith('http')) {
+            img.src = poster; img.style.display='block'; ph.style.display='none';
+        } else {
+            img.style.display='none'; ph.style.display='flex';
+        }
+        if (opt.dataset.titre) {
+            document.getElementById('filmTitle').textContent  = opt.dataset.titre;
+            document.getElementById('filmDetail').textContent = opt.dataset.genre + ' · ' + opt.dataset.duree + ' min';
+            fi.style.display='block';
+        } else { fi.style.display='none'; }
+    }
+    window.onload = () => {
+        const sel = document.getElementById('seanceSelect');
+        if (sel && sel.value) updatePoster(sel);
+    };
+</script>
 </body>
 </html>

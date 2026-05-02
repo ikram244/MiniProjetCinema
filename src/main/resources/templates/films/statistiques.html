@@ -24,13 +24,13 @@
 </head>
 <body>
 <nav>
-    <a href="/films">🎬 Films</a>
-    <a href="/seances">🕐 Séances</a>
-    <a href="/billets">🎟️ Billets</a>
+    <a href="/films">Films</a>
+    <a href="/seances">Séances</a>
+    <a href="/billets">Billets</a>
 </nav>
 <div class="container">
     <a href="/films" class="back-link">← Retour aux films</a>
-    <h1>💰 Recettes par film</h1>
+    <h1>Recettes par film</h1>
     <div class="card">
         <div th:if="${#lists.isEmpty(recettes)}" class="empty">Aucune donnée disponible.</div>
         <div th:each="r : ${recettes}" class="film-row">

@@ -4,47 +4,106 @@
     <meta charset="UTF-8"/>
     <title th:text="${titre_page}">Film</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; min-height: 100vh; }
-        nav { background: #1a252f; padding: 14px 30px; display: flex; gap: 20px; }
-        nav a { color: #ecf0f1; text-decoration: none; font-weight: 600; font-size: 0.95em; padding: 6px 12px; border-radius: 4px; transition: background 0.2s; }
-        nav a:hover { background: #2c3e50; }
-        .container { max-width: 580px; margin: 40px auto; padding: 0 20px; }
-        .card { background: white; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.09); padding: 32px; }
-        h1 { color: #2c3e50; font-size: 1.5em; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid #f0f0f0; }
-        label { display: block; margin-bottom: 16px; font-weight: 600; font-size: 0.9em; color: #444; }
-        label span { display: block; margin-bottom: 5px; }
-        input[type="text"], input[type="number"], select {
-            width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 5px;
-            font-size: 0.95em; color: #333; transition: border-color 0.2s;
+        :root {
+            --bg-dark: #0f0c14;
+            --card-bg: #1e1b26;
+            --primary-purple: #7b58ad;
+            --text-light: #e0e0e0;
+            --text-muted: #a0a0a0;
         }
-        input:focus, select:focus { outline: none; border-color: #8e44ad; box-shadow: 0 0 0 3px rgba(142,68,173,0.1); }
-        .error-msg { color: #e74c3c; font-size: 0.82em; font-weight: 500; margin-top: 4px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-light); min-height: 100vh; }
+
+        nav {
+            background-color: rgba(15, 12, 20, 0.97);
+            padding: 1rem 5%; display: flex;
+            justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #2d2a35;
+        }
+        .logo { font-size: 1.3rem; font-weight: bold; color: var(--primary-purple); letter-spacing: 2px; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a { color: var(--text-light); text-decoration: none; font-size: 0.9rem; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--primary-purple); }
+
+        .container { max-width: 580px; margin: 40px auto; padding: 0 20px; animation: fadeUp 0.5s ease; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .card { background: var(--card-bg); border-radius: 12px; border: 1px solid #2d2a35; padding: 32px; }
+        h1 { font-size: 1.4rem; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid #2d2a35; }
+
+        label { display: block; margin-bottom: 16px; font-weight: 600; font-size: 0.9rem; color: var(--text-muted); }
+        label span { display: block; margin-bottom: 6px; }
+
+        input[type="text"], input[type="number"], input[type="url"], select {
+            width: 100%; padding: 10px 12px;
+            border: 1px solid #3d3a45; border-radius: 6px;
+            font-size: 0.95rem; background: #13111a;
+            color: var(--text-light); transition: border-color 0.2s;
+        }
+        input:focus, select:focus {
+            outline: none; border-color: var(--primary-purple);
+            box-shadow: 0 0 0 3px rgba(123,88,173,0.2);
+        }
+
+        .preview {
+            margin-top: 10px; width: 100%; height: 200px;
+            object-fit: cover; border-radius: 8px;
+            border: 1px solid #3d3a45; display: none;
+        }
+
+        .error-msg { color: #e74c3c; font-size: 0.82rem; margin-top: 4px; }
+
         .form-actions { display: flex; gap: 12px; align-items: center; margin-top: 28px; }
-        .btn-primary { background: #8e44ad; color: white; padding: 11px 24px; border: none; border-radius: 5px; cursor: pointer; font-weight: 700; font-size: 0.95em; transition: background 0.2s; }
-        .btn-primary:hover { background: #6c3483; }
-        .btn-back { color: #2980b9; text-decoration: none; font-size: 0.9em; }
+
+        /* ── NOUVEAU STYLE BOUTON ── */
+        .btn-primary {
+            background: linear-gradient(135deg, #6a35c8, #9b6fd4);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 7px 16px;
+            font-size: .82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(123,88,173,0.5);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(123,88,173,0.7);
+            filter: brightness(1.1);
+        }
+
+        .btn-back { color: var(--primary-purple); text-decoration: none; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
 <nav>
-    <a href="/films">🎬 Films</a>
-    <a href="/seances">🕐 Séances</a>
-    <a href="/billets">🎟️ Billets</a>
+    <div class="logo">🎬 CinéApp</div>
+    <div class="nav-links">
+        <a href="/films">Films</a>
+        <a href="/seances">Séances</a>
+        <a href="/billets">Billets</a>
+    </div>
 </nav>
 
 <div class="container">
     <div class="card">
         <h1 th:text="${titre_page}">Film</h1>
 
-        <!-- ACTION CORRIGÉE : pointe vers /films (POST) -->
         <form th:action="@{/films}" th:object="${film}" method="post">
             <input type="hidden" th:field="*{id}"/>
 
             <label>
                 <span>Titre *</span>
-                <input type="text" th:field="*{titre}" placeholder="Ex : Le Roi Lion" required/>
+                <input type="text" th:field="*{titre}" placeholder="Ex : Inception" required/>
                 <span class="error-msg" th:if="${#fields.hasErrors('titre')}" th:errors="*{titre}"></span>
             </label>
 
@@ -63,13 +122,37 @@
                 <span class="error-msg" th:if="${#fields.hasErrors('dureeMin')}" th:errors="*{dureeMin}"></span>
             </label>
 
+            <label>
+                <span>Lien affiche (URL image)</span>
+                <input type="url" th:field="*{imageUrl}"
+                       placeholder="https://image.tmdb.org/t/p/w500/..."
+                       oninput="previewImage(this.value)"/>
+                <img id="preview" class="preview" alt="Aperçu affiche"/>
+            </label>
+
             <div class="form-actions">
-                <button type="submit" class="btn-primary">💾 Enregistrer</button>
-                <a href="/films" class="btn-back">← Retour à la liste</a>
+                <button type="submit" class="btn-primary">Enregistrer</button>
+                <a href="/films" class="btn-back">← Retour</a>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    function previewImage(url) {
+        const img = document.getElementById('preview');
+        if (url && url.startsWith('http')) {
+            img.src = url;
+            img.style.display = 'block';
+        } else {
+            img.style.display = 'none';
+        }
+    }
+    window.onload = () => {
+        const input = document.querySelector('input[type="url"]');
+        if (input && input.value) previewImage(input.value);
+    };
+</script>
 
 </body>
 </html>

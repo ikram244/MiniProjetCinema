@@ -4,45 +4,108 @@
     <meta charset="UTF-8"/>
     <title th:text="${titre_page}">Séance</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; min-height: 100vh; }
-        nav { background: #1a252f; padding: 14px 30px; display: flex; gap: 20px; }
-        nav a { color: #ecf0f1; text-decoration: none; font-weight: 600; font-size: 0.95em; padding: 6px 12px; border-radius: 4px; transition: background 0.2s; }
-        nav a:hover { background: #2c3e50; }
-        .container { max-width: 580px; margin: 40px auto; padding: 0 20px; }
-        .card { background: white; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.09); padding: 32px; }
-        h1 { color: #2c3e50; font-size: 1.5em; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid #f0f0f0; }
-        label { display: block; margin-bottom: 16px; font-weight: 600; font-size: 0.9em; color: #444; }
-        label span { display: block; margin-bottom: 5px; }
-        input[type="text"], input[type="number"], input[type="datetime-local"], select {
-            width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 5px;
-            font-size: 0.95em; color: #333; transition: border-color 0.2s;
+        :root {
+            --bg:#0a0514; --card:rgba(30,20,50,0.85);
+            --purple:#7b58ad; --purple-light:#9b6fd4; --purple-glow:rgba(123,88,173,0.3);
+            --text:#e0e8f0; --muted:#8a7fa6; --border:rgba(123,88,173,0.2);
         }
-        input:focus, select:focus { outline: none; border-color: #2980b9; box-shadow: 0 0 0 3px rgba(41,128,185,0.1); }
-        .error-msg { color: #e74c3c; font-size: 0.82em; font-weight: 500; margin-top: 4px; }
-        .form-actions { display: flex; gap: 12px; align-items: center; margin-top: 28px; }
-        .btn-primary { background: #2980b9; color: white; padding: 11px 24px; border: none; border-radius: 5px; cursor: pointer; font-weight: 700; font-size: 0.95em; transition: background 0.2s; }
-        .btn-primary:hover { background: #1a6fa0; }
-        .btn-back { color: #2980b9; text-decoration: none; font-size: 0.9em; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+        body {
+            min-height:100vh; color:var(--text);
+            background:url('https://img.freepik.com/photos-gratuite/collage-fond-film_23-2149876003.jpg') center/cover fixed;
+        }
+        body::before { content:''; position:fixed; inset:0; background:rgba(8,3,18,0.88); z-index:0; }
+        nav, .container { position:relative; z-index:1; }
+
+        nav {
+            background:rgba(10,5,20,0.95); padding:1rem 5%;
+            display:flex; justify-content:space-between; align-items:center;
+            border-bottom:1px solid var(--border); backdrop-filter:blur(10px);
+        }
+        .logo { font-size:1.3rem; font-weight:700; color:var(--purple-light); letter-spacing:2px; }
+        .nav-links { display:flex; gap:8px; }
+        .nav-links a { color:var(--text); text-decoration:none; font-size:.9rem; padding:7px 14px; border-radius:8px; transition:all .2s; }
+        .nav-links a:hover { background:rgba(123,88,173,.2); color:var(--purple-light); }
+
+        .container { max-width:600px; margin:40px auto; padding:0 20px; animation:fadeUp .5s ease; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+        .card {
+            background:var(--card); border-radius:16px;
+            border:1px solid var(--border); padding:32px;
+            backdrop-filter:blur(10px);
+        }
+
+        h1 {
+            font-size:1.5rem; font-weight:700; text-transform:uppercase;
+            letter-spacing:2px; margin-bottom:24px;
+            padding-bottom:14px; border-bottom:1px solid var(--border);
+        }
+
+        label { display:block; margin-bottom:16px; font-weight:600; font-size:.88rem; color:var(--muted); }
+        label span { display:block; margin-bottom:6px; }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="datetime-local"],
+        select {
+            width:100%; padding:11px 14px;
+            border:1px solid var(--border); border-radius:10px;
+            font-size:.95rem; background:rgba(10,5,20,.8);
+            color:var(--text); transition:border-color .2s;
+        }
+        input:focus, select:focus {
+            outline:none; border-color:var(--purple);
+            box-shadow:0 0 0 3px var(--purple-glow);
+        }
+
+        .error-msg { color:#e74c3c; font-size:.82rem; margin-top:4px; }
+
+        .form-actions { display:flex; gap:12px; align-items:center; margin-top:28px; }
+
+        /* ── NOUVEAU STYLE BOUTON ── */
+        .btn-primary {
+            background: linear-gradient(135deg, #6a35c8, #9b6fd4);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 7px 16px;
+            font-size: .82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(123,88,173,0.5);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(123,88,173,0.7);
+            filter: brightness(1.1);
+        }
+
+        .btn-back { color:var(--purple-light); text-decoration:none; font-size:.9rem; }
     </style>
 </head>
 <body>
 
 <nav>
-    <a href="/films">🎬 Films</a>
-    <a href="/seances">🕐 Séances</a>
-    <a href="/billets">🎟️ Billets</a>
+    <div class="logo">🎬 CinéApp</div>
+    <div class="nav-links">
+        <a href="/films">Films</a>
+        <a href="/seances">Séances</a>
+        <a href="/billets">Billets</a>
+    </div>
 </nav>
 
 <div class="container">
     <div class="card">
         <h1 th:text="${titre_page}">Séance</h1>
 
-        <!-- ACTION CORRIGÉE : pointe vers /seances (POST) -->
         <form th:action="@{/seances}" th:object="${seance}" method="post">
             <input type="hidden" th:field="*{id}"/>
 
-            <!-- Film -->
             <label>
                 <span>Film *</span>
                 <select name="filmId" required>
@@ -53,34 +116,30 @@
                             th:selected="${seance.film != null and seance.film.id == film.id}">
                     </option>
                 </select>
-                <span class="error-msg" th:if="${#fields.hasErrors('film')}" th:errors="*{film}"></span>
+                <span class="error-msg" th:if="${erreurFilm}" th:text="${erreurFilm}"></span>
             </label>
 
-            <!-- Date et heure -->
             <label>
                 <span>Date et Heure *</span>
                 <input type="datetime-local" th:field="*{dateHeure}" required/>
-                <span class="error-msg" th:if="${#fields.hasErrors('dateHeure')}" th:errors="*{dateHeure}"></span>
+                <span class="error-msg" th:if="${erreurDate}" th:text="${erreurDate}"></span>
             </label>
 
-            <!-- Salle -->
             <label>
                 <span>Salle *</span>
                 <input type="text" th:field="*{salle}" placeholder="Ex : Salle 1" required/>
-                <span class="error-msg" th:if="${#fields.hasErrors('salle')}" th:errors="*{salle}"></span>
+                <span class="error-msg" th:if="${erreurSalle}" th:text="${erreurSalle}"></span>
             </label>
 
-            <!-- Version -->
             <label>
                 <span>Version *</span>
                 <select th:field="*{version}" required>
                     <option value="">-- Choisir --</option>
                     <option th:each="v : ${versions}" th:value="${v}" th:text="${v}"></option>
                 </select>
-                <span class="error-msg" th:if="${#fields.hasErrors('version')}" th:errors="*{version}"></span>
+                <span class="error-msg" th:if="${erreurVersion}" th:text="${erreurVersion}"></span>
             </label>
 
-            <!-- Capacité -->
             <label>
                 <span>Capacité (places)</span>
                 <input type="number" th:field="*{capacite}" min="1" placeholder="100"/>
@@ -88,7 +147,7 @@
             </label>
 
             <div class="form-actions">
-                <button type="submit" class="btn-primary">💾 Enregistrer</button>
+                <button type="submit" class="btn-primary">Enregistrer</button>
                 <a href="/seances" class="btn-back">← Retour à la liste</a>
             </div>
         </form>
